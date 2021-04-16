@@ -8,5 +8,11 @@ simplers = {
                                        soundier.clip(soundier.sine(freq, 1, dur) *
                                                      soundier.adsr(dur, 0, .1, db(-21)), db(-18)) *
                                        db(18) * vol)
-                                   )
+                                   ),
+    'Short Pluck': \
+        lambda soundier: SynthRade(soundier,
+                                   lambda freq, vol, dur: soundier.render(
+                                       soundier.square(freq, 1, dur) *
+                                       soundier.adsr(dur, 0, .1, 0) * vol
+                                   )),
 }
