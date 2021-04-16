@@ -13,17 +13,26 @@ class SounDier:
         self.bitdepth = self.wavfile.bitdepth
         self.samprate = self.wavfile.samprate
 
+    @property
+    def peak(self):
+        return 2 ** (self.bitdepth - 1) - 1
+
     def sine(self, freq, amp, dur):
-        """Generates sine wave: [freq] hertz, [amp] relative amplitude (0<=[amp]<=1), [dur] secs."""
-        return arr([int(amp * 2 ** (self.bitdepth - 1) * sin(freq * 2 * pi * s / self.samprate))
+        """Generates sine wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
+        return arr([int(amp * self.peak * sin(freq * 2 * pi * s / self.samprate))
+                    for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
+
+    def square(self, freq, amp, dur):
+        """Generates square wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
+        return arr([int(self.peak * amp * (-round(freq / self.samprate * s % 1) * 2 + 1))
                     for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
     def silence(self, dur):
-        """Generates [dur] secs silence."""
+        """Generates `dur` secs silence."""
         return arr([0 for _ in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
     def am(self, carr, modfunc, offset=0):
-        """Applies amplitude modulation to [carr] by [mod] with [offset] phase offset (in samples)."""
+        """Applies amplitude modulation to `carr` by `mod` with `offset` phase offset (in samples)."""
         mod = arr([modfunc(s + offset) for s in range(len(carr))])
         return arr(carr * mod, dtype=f'int{self.bitdepth}')
 
@@ -60,7 +69,7 @@ def telephone(num, vol=db(-8)):
 
 if __name__ == '__main__':
     sound = SounDier(Wav('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
-    am = lambda s: db(-6) + db(-12) * cos(500 * 2 * pi * s / 44100)
+    am = lambda s: db(-6) + db(-12) * cos(110 * 2 * pi * s / 44100)
     sound.write(
-        sound.am(sound.sine(440, db(0), 5), am)
+        sound.am(sound.square(440, db(0), 5),am)
     )
