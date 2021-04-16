@@ -1,6 +1,6 @@
 from WavZard import WavZard
 from MatHero import db
-from math import sin, cos, pi
+from math import ceil, sin, cos, pi
 from numpy import array as arr, hstack as seq
 
 
@@ -19,9 +19,12 @@ class SounDier:
 
     def wave(self, freq, form='sine'):
         """Generates the basic wave function (amp=1) with `freq` frequency and `form` form (defaults to 'sine') for `soundier`.
-        Supported types: 'sine', 'saw', 'square'."""
+        Supported types: 'sine', 'triangle', 'saw', 'square'."""
         if form == 'sine':
             return lambda s: sin(freq / self.samprate * 2 * pi * s)
+        elif form == 'triangle':
+            return lambda s: ((-1) ** (ceil(.5 - freq / self.samprate * s) % 2) *
+                              ((-(freq / self.samprate * s + .5) % 1) * 2 + 1))
         elif form == 'saw':
             return lambda s: (freq / self.samprate * -s % 1) * 2 + 1
         elif form == 'square':
@@ -31,7 +34,12 @@ class SounDier:
 
     def sine(self, freq, amp, dur):
         """Generates sine wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
-        return arr([amp * self.peak * self.wave(freq, 'sine')(s)
+        return arr([self.peak * amp * self.wave(freq, 'sine')(s)
+                    for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
+
+    def triangle(self, freq, amp, dur):
+        """Generates triangle wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
+        return arr([self.peak * amp * self.wave(freq, 'triangle')(s)
                     for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
     def saw(self, freq, amp, dur):
@@ -55,7 +63,7 @@ class SounDier:
 
     def wam(self, carr, zero, amp, freq, form='sine', offset=0):
         """Applies amplitude modulation to `carr` by wave of `form` form (defaults to 'sine') on `zero` level with `amp` amplitude, `freq` frequency and `offset` phase offset (in samples).
-        Supported waveforms: 'sine', 'saw', 'square'."""
+        Supported waveforms: 'sine', 'triangle', 'saw', 'square'."""
         return self.am(carr, lambda s: zero + amp * self.wave(freq, form)(s), offset)
 
     def write(self, *data):
@@ -92,5 +100,5 @@ def telephone(num, vol=db(-8)):
 if __name__ == '__main__':
     sound = SounDier(WavZard('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
     sound.write(
-        sound.wam(sound.sine(440, db(0), 5), db(-6), db(-12), 220, 'square')
+        sound.triangle(440, db(0), 5)
     )
