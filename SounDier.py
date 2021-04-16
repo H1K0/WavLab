@@ -22,6 +22,11 @@ class SounDier:
         return arr([int(amp * self.peak * sin(freq * 2 * pi * s / self.samprate))
                     for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
+    def saw(self, freq, amp, dur):
+        """Generates saw wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
+        return arr([self.peak * amp * ((freq / self.samprate * -s % 1) * 2 + 1)
+                    for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
+
     def square(self, freq, amp, dur):
         """Generates square wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
         return arr([int(self.peak * amp * (-round(freq / self.samprate * s % 1) * 2 + 1))
@@ -69,7 +74,7 @@ def telephone(num, vol=db(-8)):
 
 if __name__ == '__main__':
     sound = SounDier(Wav('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
-    am = lambda s: db(-6) + db(-12) * cos(110 * 2 * pi * s / 44100)
+    am = lambda s: db(-6) + db(-12) * cos(220 * 2 * pi * s / 44100)
     sound.write(
-        sound.am(sound.square(440, db(0), 5),am)
+        sound.am(sound.saw(440, db(0), 5), am)
     )

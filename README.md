@@ -17,7 +17,7 @@ In [WavZard](WavZard.py) there is a class for working with `.wav` files. That in
 [MatHero](MatHero.py) contains some math functions that help with signal analysis and modulation.
 
 [SounDier](SounDier.py) can be considered as the central file of this repository. This is an executable code for simple operations such as
-- Sine and square wave generation;
+- Sine, saw and square wave generation;
 - Silence generation;
 - Amplitude modulation;
 - [DTMF](https://en.wikipedia.org/wiki/Dual-tone_multi-frequency_signaling) encoder (just for fun).
