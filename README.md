@@ -10,7 +10,7 @@ So yeah, this is not a big project, this is just how I explore sound and sound e
 
 Let's take a look.
 
-In [WaveZard](Wavezard.py) there is a class for working with `.wav` files. That includes:
+In [WavZard](WavZard.py) there is a class for working with `.wav` files. That includes:
 - Reading and writing into files;
 - Analyzing and setting parameters.
 
