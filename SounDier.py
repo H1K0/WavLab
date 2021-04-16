@@ -66,6 +66,16 @@ class SounDier:
         Supported waveforms: 'sine', 'triangle', 'saw', 'square'."""
         return self.am(carr, lambda s: zero + amp * self.wave(freq, form)(s), offset)
 
+    def noteseq(self, notes, lennote=1, vol=1):
+        """Converts note sequence to samples stream. Every note's length is `lennote`, volume is `vol`."""
+        out = arr([])
+        for note in notes:
+            try:
+                out = seq([out, self.sine(diatonic(note), vol, lennote)])
+            except:
+                out = seq([out, self.silence(lennote)])
+        return arr(out, dtype=f'int{self.bitdepth}')
+
     def write(self, *data):
         self.wavfile.write(seq([*data]))
 
@@ -99,13 +109,8 @@ def telephone(num, vol=db(-8)):
 
 if __name__ == '__main__':
     sound = SounDier(WavZard('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
-    sound.write(
-        sound.sine(diatonic('a5'), db(0), 1),
-        sound.sine(diatonic('f5'), db(0), 1),
-        sound.sine(diatonic('g5'), db(0), 1),
-        sound.sine(diatonic('c5'), db(0), 2),
-        sound.sine(diatonic('c5'), db(0), 1),
-        sound.sine(diatonic('g5'), db(0), 1),
-        sound.sine(diatonic('a5'), db(0), 1),
-        sound.sine(diatonic('f5'), db(0), 2)
-    )
+    sound.write(sound.noteseq(
+        ['f#6'] * 5 + ['e6', 'd6'] + ['c#6'] * 7 + ['d6', 'e6'] + ['h5'] * 5 + ['a5', 'c#6'] + ['h5'] * 5 +
+        ['h6', 'a6', 'e6', 'e6'] + ['f#6'] * 4 + ['a6', 'f#6', 'd6'] + ['c#6'] * 7 + ['d6', 'e6'] + ['h5'] * 5 +
+        ['a5', 'c#6'] + ['h5'] * 5, 1 / 4, db(-6))
+    )  # an intro melody from my SPARKLE
