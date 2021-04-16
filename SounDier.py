@@ -1,5 +1,5 @@
 from WavZard import WavZard
-from MatHero import db
+from MatHero import db, diatonic
 from math import ceil, sin, cos, pi
 from numpy import array as arr, hstack as seq
 
@@ -23,8 +23,8 @@ class SounDier:
         if form == 'sine':
             return lambda s: sin(freq / self.samprate * 2 * pi * s)
         elif form == 'triangle':
-            return lambda s: ((-1) ** (ceil(.5 - freq / self.samprate * s) % 2) *
-                              ((-(freq / self.samprate * s + .5) % 1) * 2 + 1))
+            return lambda s: ((-1) ** (ceil(.5 - 2 * freq / self.samprate * s) % 2) *
+                              ((-(2 * freq / self.samprate * s + .5) % 1) * 2 + 1))
         elif form == 'saw':
             return lambda s: (freq / self.samprate * -s % 1) * 2 + 1
         elif form == 'square':
@@ -100,5 +100,12 @@ def telephone(num, vol=db(-8)):
 if __name__ == '__main__':
     sound = SounDier(WavZard('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
     sound.write(
-        sound.triangle(440, db(0), 5)
+        sound.sine(diatonic('a5'), db(0), 1),
+        sound.sine(diatonic('f5'), db(0), 1),
+        sound.sine(diatonic('g5'), db(0), 1),
+        sound.sine(diatonic('c5'), db(0), 2),
+        sound.sine(diatonic('c5'), db(0), 1),
+        sound.sine(diatonic('g5'), db(0), 1),
+        sound.sine(diatonic('a5'), db(0), 1),
+        sound.sine(diatonic('f5'), db(0), 2)
     )
