@@ -19,7 +19,9 @@ In [WavZard](WavZard.py) there is a class for working with `.wav` files. That in
 [SounDier](SounDier.py) can be considered as the central file of this repository. This is an executable code for simple operations such as
 - Sine, triangle, saw and square wave generation;
 - Silence generation;
+- Hard clipping;
 - Amplitude modulation;
+- Diatonic notes and a simple sequencer;
 - [DTMF](https://en.wikipedia.org/wiki/Dual-tone_multi-frequency_signaling) encoder (just for fun).
 
 ---

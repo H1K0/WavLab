@@ -1,7 +1,7 @@
 from WavZard import WavZard
 from MatHero import db, diatonic
 from math import ceil, sin, cos, pi
-from numpy import array as arr, hstack as seq
+from numpy import array as arr, hstack as seq, vectorize as numfunc
 
 
 class SounDier:
@@ -56,6 +56,12 @@ class SounDier:
         """Generates `dur` secs silence."""
         return arr([0 for _ in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
+    def clip(self, wave, level):
+        """Returns a clipped signal at `level` (relative)."""
+        clipper = numfunc(lambda s: min(s, level * self.peak) * (s > 0) +
+                                    max(s, -level * self.peak) * (s < 0), otypes=[f'int{self.bitdepth}'])
+        return clipper(wave)
+
     def am(self, carr, modfunc, offset=0):
         """Applies amplitude modulation to `carr` by `mod` with `offset` phase offset (in samples)."""
         mod = arr([modfunc(s + offset) for s in range(len(carr))])
@@ -109,8 +115,6 @@ def telephone(num, vol=db(-8)):
 
 if __name__ == '__main__':
     sound = SounDier(WavZard('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
-    sound.write(sound.noteseq(
-        ['f#6'] * 5 + ['e6', 'd6'] + ['c#6'] * 7 + ['d6', 'e6'] + ['h5'] * 5 + ['a5', 'c#6'] + ['h5'] * 5 +
-        ['h6', 'a6', 'e6', 'e6'] + ['f#6'] * 4 + ['a6', 'f#6', 'd6'] + ['c#6'] * 7 + ['d6', 'e6'] + ['h5'] * 5 +
-        ['a5', 'c#6'] + ['h5'] * 5, 1 / 4, db(-6))
-    )  # an intro melody from my SPARKLE
+    sound.write(
+        sound.clip(sound.sine(440, 1, 1), db(-6))
+    )
