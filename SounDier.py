@@ -1,4 +1,4 @@
-from WavZard import Wav
+from WavZard import WavZard
 from MatHero import db
 from math import sin, cos, pi
 from numpy import array as arr, hstack as seq
@@ -73,7 +73,7 @@ def telephone(num, vol=db(-8)):
 
 
 if __name__ == '__main__':
-    sound = SounDier(Wav('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
+    sound = SounDier(WavZard('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
     am = lambda s: db(-6) + db(-12) * cos(220 * 2 * pi * s / 44100)
     sound.write(
         sound.am(sound.saw(440, db(0), 5), am)

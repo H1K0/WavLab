@@ -3,7 +3,7 @@ import numpy as np
 from os import access, F_OK
 
 
-class Wav:
+class WavZard:
     """Let's work with the waves! This class will help you doing some interesting things with them.
     To get started, initialize its object sending the path to the file as an argument!"""
 
