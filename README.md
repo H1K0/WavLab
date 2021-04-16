@@ -21,6 +21,7 @@ In [WavZard](WavZard.py) there is a class for working with `.wav` files. That in
 - Silence generation;
 - Hard clipping;
 - Amplitude modulation;
+- Linear ADSR envelope generator;
 - Diatonic notes and a simple sequencer;
 - [DTMF](https://en.wikipedia.org/wiki/Dual-tone_multi-frequency_signaling) encoder (just for fun).
 

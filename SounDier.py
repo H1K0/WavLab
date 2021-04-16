@@ -1,7 +1,7 @@
 from WavZard import WavZard
 from MatHero import db, diatonic
 from math import ceil, sin, cos, pi
-from numpy import array as arr, hstack as seq, vectorize as numfunc
+from numpy import array as arr, zeros, hstack as seq, vectorize as numfunc
 
 
 class SounDier:
@@ -54,7 +54,7 @@ class SounDier:
 
     def silence(self, dur):
         """Generates `dur` secs silence."""
-        return arr([0 for _ in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
+        return zeros(round(dur * self.samprate), dtype=f'int{self.bitdepth}')
 
     def clip(self, wave, level):
         """Returns a clipped signal at `level` (relative)."""
@@ -71,6 +71,26 @@ class SounDier:
         """Applies amplitude modulation to `carr` by wave of `form` form (defaults to 'sine') on `zero` level with `amp` amplitude, `freq` frequency and `offset` phase offset (in samples).
         Supported waveforms: 'sine', 'triangle', 'saw', 'square'."""
         return self.am(carr, lambda s: zero + amp * self.wave(freq, form)(s), offset)
+
+    def adsr(self, dur, att=.01, dec=.1, sus=db(-3), rel=.01):
+        """Linear ADSR envelope generator. Takes duration, attack, decay, and release in secs and relative sustain."""
+        size = round(dur * self.samprate)
+        env = zeros(size) + sus
+        att = round(att * self.samprate)
+        dec = round(dec * self.samprate)
+        rel = round(rel * self.samprate)
+        s = 0
+        while s < min(size, att):  # attack
+            env[s] = s / att
+            s += 1
+        while s < min(size, att + dec):  # decay
+            env[s] = 1 - (s - att) * (1 - sus) / dec
+            s += 1
+        s = max(0, size - rel)
+        while s < size:  # release
+            env[s] *= 1 - (s - size + rel) / rel
+            s += 1
+        return env
 
     def noteseq(self, notes, lennote=1, vol=1):
         """Converts note sequence to samples stream. Every note's length is `lennote`, volume is `vol`."""
@@ -116,5 +136,6 @@ def telephone(num, vol=db(-8)):
 if __name__ == '__main__':
     sound = SounDier(WavZard('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
     sound.write(
-        sound.clip(sound.sine(440, 1, 1), db(-6))
+        arr(sound.saw(diatonic('g5'), 1, 1) * sound.adsr(1, att=0, sus=db(-9)),
+            dtype=f'int{sound.bitdepth}')
     )
