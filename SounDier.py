@@ -17,19 +17,31 @@ class SounDier:
     def peak(self):
         return 2 ** (self.bitdepth - 1) - 1
 
+    def wave(self, freq, form='sine'):
+        """Generates the basic wave function (amp=1) with `freq` frequency and `form` form (defaults to 'sine') for `soundier`.
+        Supported types: 'sine', 'saw', 'square'."""
+        if form == 'sine':
+            return lambda s: sin(freq / self.samprate * 2 * pi * s)
+        elif form == 'saw':
+            return lambda s: (freq / self.samprate * -s % 1) * 2 + 1
+        elif form == 'square':
+            return lambda s: -round(freq / self.samprate * s % 1) * 2 + 1
+        else:
+            raise ValueError(f'unexpected type \'{type}\'')
+
     def sine(self, freq, amp, dur):
         """Generates sine wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
-        return arr([int(amp * self.peak * sin(freq * 2 * pi * s / self.samprate))
+        return arr([amp * self.peak * self.wave(freq, 'sine')(s)
                     for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
     def saw(self, freq, amp, dur):
         """Generates saw wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
-        return arr([self.peak * amp * ((freq / self.samprate * -s % 1) * 2 + 1)
+        return arr([self.peak * amp * self.wave(freq, 'saw')(s)
                     for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
     def square(self, freq, amp, dur):
         """Generates square wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
-        return arr([int(self.peak * amp * (-round(freq / self.samprate * s % 1) * 2 + 1))
+        return arr([self.peak * amp * self.wave(freq, 'square')(s)
                     for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
     def silence(self, dur):
@@ -40,6 +52,11 @@ class SounDier:
         """Applies amplitude modulation to `carr` by `mod` with `offset` phase offset (in samples)."""
         mod = arr([modfunc(s + offset) for s in range(len(carr))])
         return arr(carr * mod, dtype=f'int{self.bitdepth}')
+
+    def wam(self, carr, zero, amp, freq, form='sine', offset=0):
+        """Applies amplitude modulation to `carr` by wave of `form` form (defaults to 'sine') on `zero` level with `amp` amplitude, `freq` frequency and `offset` phase offset (in samples).
+        Supported waveforms: 'sine', 'saw', 'square'."""
+        return self.am(carr, lambda s: zero + amp * self.wave(freq, form)(s), offset)
 
     def write(self, *data):
         self.wavfile.write(seq([*data]))
@@ -74,7 +91,6 @@ def telephone(num, vol=db(-8)):
 
 if __name__ == '__main__':
     sound = SounDier(WavZard('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
-    am = lambda s: db(-6) + db(-12) * cos(220 * 2 * pi * s / 44100)
     sound.write(
-        sound.am(sound.saw(440, db(0), 5), am)
+        sound.wam(sound.sine(440, db(0), 5), db(-6), db(-12), 220, 'square')
     )
