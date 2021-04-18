@@ -84,7 +84,7 @@ class SounDier:
         offset *= self.samprate / freq
         return self.am(carr, lambda s: zero + amp * self.wave(freq, form)(s), offset)
 
-    def adsr(self, dur: float, att: float = .01, dec: float = .1, sus: float = db(-3), rel: float = .01) -> ndarray:
+    def adsr(self, dur: float, att: float = .01, dec: float = .1, sus: float = 1, rel: float = .01) -> ndarray:
         """Linear ADSR envelope generator. Takes duration, attack, decay, and release in secs and relative sustain."""
         size = round(dur * self.samprate)
         env = zeros(size) + sus
