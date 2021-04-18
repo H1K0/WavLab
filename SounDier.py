@@ -30,7 +30,7 @@ class SounDier:
         elif form == 'triangle':
             return lambda s: 2 / pi * asin(sin(2 * pi * freq * (s + offset)))
         elif form == 'saw':
-            return lambda s: -2 / pi * atan(tan(pi * freq * (s + 2 / freq + offset)))
+            return lambda s: -2 / pi * atan(tan(pi * freq * (s + 0.5 / freq + offset)))
         elif form == 'square':
             return lambda s: -round(freq * (s + offset) % 1) * 2 + 1
         else:
