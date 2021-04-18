@@ -1,7 +1,7 @@
 from WavZard import WavZard
 from MatHero import db, diatonic
 from SynthOrage import simplers
-from math import ceil, sin, cos, pi
+from math import sin, asin, cos, pi
 from numpy import array as arr, zeros, hstack as seq, vectorize as numfunc
 
 
@@ -24,8 +24,7 @@ class SounDier:
         if form == 'sine':
             return lambda s: sin(freq / self.samprate * 2 * pi * s)
         elif form == 'triangle':
-            return lambda s: ((-1) ** (ceil(.5 - 2 * freq / self.samprate * s) % 2) *
-                              ((-(2 * freq / self.samprate * s + .5) % 1) * 2 + 1))
+            return lambda s: 2 / pi * asin(sin(2 * pi * freq / self.samprate * s))
         elif form == 'saw':
             return lambda s: (freq / self.samprate * -s % 1) * 2 + 1
         elif form == 'square':
