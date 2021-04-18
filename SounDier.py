@@ -1,25 +1,27 @@
 from WavZard import WavZard
 from MatHero import db, diatonic
-from SynthOrage import simplers
+import SynthOrage as Synths
 from math import sin, asin, tan, atan, pi
-from numpy import array as arr, zeros, hstack as seq, vectorize as numfunc
+from numpy import array as arr, ndarray, zeros, hstack as seq, vectorize as numfunc
+from collections.abc import Callable as Func
 
 
 class SounDier:
     """So, here we go working with the sound."""
 
-    def __init__(self, wav):
+    def __init__(self, wav: WavZard) -> None:
         self.wavfile = wav
         self.channels = self.wavfile.channels
         self.bitdepth = self.wavfile.bitdepth
         self.samprate = self.wavfile.samprate
 
     @property
-    def peak(self):
+    def peak(self) -> float:
         return 2 ** (self.bitdepth - 1) - 1
 
-    def wave(self, freq, form='sine'):
+    def wave(self, freq: float, form: str = 'sine') -> Func[[float], float]:
         """Generates the basic wave function (amp=1) with `freq` frequency and `form` form (defaults to 'sine') for `soundier`.
+
         Supported types: 'sine', 'triangle', 'saw', 'square'."""
         if form == 'sine':
             return lambda s: sin(freq / self.samprate * 2 * pi * s)
@@ -32,47 +34,50 @@ class SounDier:
         else:
             raise ValueError(f'unexpected type \'{type}\'')
 
-    def sine(self, freq, amp, dur):
+    def sine(self, freq: float, amp: float, dur: float) -> ndarray:
         """Generates sine wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
         return arr([self.peak * amp * self.wave(freq, 'sine')(s)
                     for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
-    def triangle(self, freq, amp, dur):
+    def triangle(self, freq: float, amp: float, dur: float) -> ndarray:
         """Generates triangle wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
         return arr([self.peak * amp * self.wave(freq, 'triangle')(s)
                     for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
-    def saw(self, freq, amp, dur):
+    def saw(self, freq: float, amp: float, dur: float) -> ndarray:
         """Generates saw wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
         return arr([self.peak * amp * self.wave(freq, 'saw')(s)
                     for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
-    def square(self, freq, amp, dur):
+    def square(self, freq: float, amp: float, dur: float) -> ndarray:
         """Generates square wave: `freq` hertz, `amp` relative amplitude (0<=[amp]<=1), `dur` secs."""
         return arr([self.peak * amp * self.wave(freq, 'square')(s)
                     for s in range(round(dur * self.samprate))], dtype=f'int{self.bitdepth}')
 
-    def silence(self, dur):
+    def silence(self, dur: float) -> ndarray:
         """Generates `dur` secs silence."""
         return zeros(round(dur * self.samprate), dtype=f'int{self.bitdepth}')
 
-    def clip(self, wave, level):
+    def clip(self, wave: ndarray, level: float) -> ndarray:
         """Returns a clipped signal at `level` (relative)."""
         clipper = numfunc(lambda s: min(s, level * self.peak) * (s > 0) +
                                     max(s, -level * self.peak) * (s < 0), otypes=[f'int{self.bitdepth}'])
         return clipper(wave)
 
-    def am(self, carr, modfunc, offset=0):
-        """Applies amplitude modulation to `carr` by `mod` with `offset` phase offset (in samples)."""
+    def am(self, carr: ndarray, modfunc: Func[[float], float], offset: float = 0) -> ndarray:
+        """Applies amplitude modulation to `carr` by `mod` function with `offset` phase offset (in samples)."""
         mod = arr([modfunc(s + offset) for s in range(len(carr))])
-        return arr(carr * mod, dtype=f'int{self.bitdepth}')
+        return self.render(carr * mod)
 
-    def wam(self, carr, zero, amp, freq, form='sine', offset=0):
-        """Applies amplitude modulation to `carr` by wave of `form` form (defaults to 'sine') on `zero` level with `amp` amplitude, `freq` frequency and `offset` phase offset (in samples).
+    def wam(self, carr: ndarray, zero: float, amp: float, freq: float, form: str = 'sine',
+            offset: float = 0) -> ndarray:
+        """Applies amplitude modulation to `carr` by wave of `form` form (defaults to 'sine')
+        on `zero` level with `amp` amplitude, `freq` frequency and `offset` phase offset (in samples).
+
         Supported waveforms: 'sine', 'triangle', 'saw', 'square'."""
         return self.am(carr, lambda s: zero + amp * self.wave(freq, form)(s), offset)
 
-    def adsr(self, dur, att=.01, dec=.1, sus=db(-3), rel=.01):
+    def adsr(self, dur: float, att: float = .01, dec: float = .1, sus: float = db(-3), rel: float = .01) -> ndarray:
         """Linear ADSR envelope generator. Takes duration, attack, decay, and release in secs and relative sustain."""
         size = round(dur * self.samprate)
         env = zeros(size) + sus
@@ -92,19 +97,19 @@ class SounDier:
             s += 1
         return env
 
-    def glue(self, *waves):
+    def glue(self, *waves: ndarray) -> ndarray:
         """Glue waves."""
         return seq(waves)
 
-    def render(self, wave):
+    def render(self, wave: ndarray) -> ndarray:
         """Render wave data to output format."""
         return arr(wave, dtype=f'int{self.bitdepth}')
 
-    def write(self, *data):
+    def write(self, *data: ndarray) -> None:
         self.wavfile.write(seq(data))
 
 
-def telephone(num, vol=db(-8)):
+def telephone(num: str, vol: float = db(-8)) -> ndarray:
     """Convert some symbols to DTMF."""
     global sound
     num = num.upper()

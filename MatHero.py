@@ -1,12 +1,13 @@
 from math import log10 as lg
 
 
-def db(val):
+def db(val: float) -> float:
+    """Converts dB to multiplier."""
     return 10 ** (val / 20)
 
 
-def diatonic(note):
-    """Returns the frequency for given note. 'A5' is 440 Hz."""
+def diatonic(note: str) -> float:
+    """Returns the frequency for given diatonic note. 'A5' is 440 Hz."""
     note = note.lower()
     st = 0
     if note[:2] in ('c#', 'db'):
@@ -51,7 +52,7 @@ def diatonic(note):
     return 440 * 2 ** (st / 12)
 
 
-def rel(val, peak, digs=0):
+def rel(val: float, peak: float, digs: int = 0) -> str:
     if val == 0:
         return '-inf'
     return str(round(20 * lg(abs(val) / peak), digs))
