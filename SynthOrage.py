@@ -15,4 +15,9 @@ simplers = {
                                        soundier.square(freq, 1, dur) *
                                        soundier.adsr(dur, 0, .1, 0) * vol
                                    )),
+    'Trisaw': \
+        lambda soundier: SynthRade(soundier,
+                                   lambda freq, vol, dur: soundier.render(
+                                       (soundier.triangle(freq, 2 / 3, dur) + soundier.saw(freq, 2 / 3, dur)) * vol
+                                   )),
 }
