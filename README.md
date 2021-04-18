@@ -1,10 +1,15 @@
-# WavLab
+# WavLab ![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)
 
 ## What is it?
 
-WavLab is a set of some cute toys for wworking with sound. Although I'm kinda professional in music, I'm a quite beginner in sound maths, but I really want to discover it more and deeper.
+WavLab is a set of some cute toys for working with sound. Although I'm kinda professional in music, I'm quite a beginner in sound maths and programming, but I really want to discover it more and deeper.
 
 So yeah, this is not a big project, this is just how I explore sound and sound encoding.
+
+## Requirements
+
+- Python 3.8+
+- `numpy` lib
 
 ## What do we have?
 

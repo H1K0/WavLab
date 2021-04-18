@@ -18,6 +18,7 @@ simplers = {
     'Trisaw': \
         lambda soundier: SynthRade(soundier,
                                    lambda freq, vol, dur: soundier.render(
-                                       (soundier.triangle(freq, 2 / 3, dur) + soundier.saw(freq, 2 / 3, dur)) * vol
+                                       (soundier.triangle(freq, 2 / 3, dur) + soundier.saw(freq, 2 / 3, dur)) *
+                                       soundier.adsr(dur, .01, .5, db(-2), .01) * vol
                                    )),
 }
