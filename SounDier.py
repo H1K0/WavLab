@@ -1,8 +1,7 @@
 from WavZard import WavZard
-from MatHero import db, diatonic
-import SynthOrage as Synths
+from MatHero import db
 from math import sin, asin, tan, atan, pi
-from numpy import array as arr, ndarray, zeros, hstack as seq, vectorize as numfunc
+from numpy import array as arr, ndarray, zeros, hstack as seq, vectorize as npfunc
 from collections.abc import Callable as Func
 
 
@@ -67,8 +66,8 @@ class SounDier:
 
     def clip(self, wave: ndarray, level: float) -> ndarray:
         """Returns a clipped signal at `level` (relative)."""
-        clipper = numfunc(lambda s: min(s, level * self.peak) * (s > 0) +
-                                    max(s, -level * self.peak) * (s < 0), otypes=[f'int{self.bitdepth}'])
+        clipper = npfunc(lambda s: min(s, level * self.peak) * (s > 0) +
+                                   max(s, -level * self.peak) * (s < 0), otypes=[f'int{self.bitdepth}'])
         return clipper(wave)
 
     def am(self, carr: ndarray, modfunc: Func[[float], float], offset: float = 0) -> ndarray:
@@ -142,35 +141,3 @@ def telephone(num: str, vol: float = db(-8)) -> ndarray:
             this += sound.sine(1633, vol, .08)
         dtmf = seq([dtmf, this, sound.silence(.1)])
     return dtmf
-
-
-if __name__ == '__main__':
-    sound = SounDier(WavZard('WAV/test.wav', channels=1, bitdepth=16, samprate=44100))
-    synth = simplers['Soft Pluck'](sound)
-    sound.write(sound.glue(
-        synth(diatonic('f#6'), 1, 5 / 4),  # an intro melody from my SPARKLE
-        synth(diatonic('e6'), 1, 1 / 4),
-        synth(diatonic('d6'), 1, 1 / 4),
-        synth(diatonic('c#6'), 1, 7 / 4),
-        synth(diatonic('d6'), 1, 1 / 4),
-        synth(diatonic('e6'), 1, 1 / 4),
-        synth(diatonic('h5'), 1, 5 / 4),
-        synth(diatonic('a5'), 1, 1 / 4),
-        synth(diatonic('c#6'), 1, 1 / 4),
-        synth(diatonic('h5'), 1, 5 / 4),
-        synth(diatonic('h6'), 1, 1 / 4),
-        synth(diatonic('a6'), 1, 1 / 4),
-        synth(diatonic('e6'), 1, 2 / 4),
-        synth(diatonic('f#6'), 1, 4 / 4),
-        synth(diatonic('a6'), 1, 1 / 4),
-        synth(diatonic('f#6'), 1, 1 / 4),
-        synth(diatonic('d6'), 1, 1 / 4),
-        synth(diatonic('c#6'), 1, 7 / 4),
-        synth(diatonic('d6'), 1, 1 / 4),
-        synth(diatonic('e6'), 1, 1 / 4),
-        synth(diatonic('h5'), 1, 4 / 4),
-        synth(diatonic('h5'), 1, 1 / 4),
-        synth(diatonic('a5'), 1, 1 / 4),
-        synth(diatonic('c#6'), 1, 1 / 4),
-        synth(diatonic('h5'), 1, 5 / 4),
-    ))
